@@ -1,10 +1,11 @@
 #!/bin/sh
 #  The following script queries call manager via SNMP to get basic phone data then visits the phones web page to grab serial number.
 # html-xml-utils is required for hxselect
+# tidy is required for tidy printing of malformed or condensed HTML
 #GET INDEXES
 phone_index_array=()
-CUCM="1.2.3.4"
-COMMUNITY="somecommunity"
+CUCM="10.2.249.106"
+COMMUNITY="cacti"
 
 #Create file
 CSV_FILE="phone_data.csv"
@@ -35,9 +36,15 @@ for i in ${phone_index_array[@]}; do
     if [ -z "$DEVICE_TYPE" ]; then
         DEVICE_TYPE=$(curl -s 0 $IP/DeviceInformation | awk '/Model\ Number/,/Codec/' | grep -e '^<TD>' | hxselect -c B 2>/dev/null)
     fi
+    if [ -z "$DEVICE_TYPE" ]; then
+        DEVICE_TYPE=$(curl -s 0 http://$IP/ | tidy -q  2>&1 | awk '/Model\ Number/,/Codec/' | grep -ve Warning -ve normalize | hxselect -c b | sed 's/Number\(.*\)/Number \1/' | awk {'print $3'})
+    fi
     SERIAL=$(curl -s 0 $IP/Device_Information.html | awk '/Serial\ Number/,/Model\ Number/' | grep -ie '</tr>' | sed 's/\<\/tr\>//' | hxselect -c b 2>/dev/null)
     if [ -z "$SERIAL" ]; then
         SERIAL=$(curl -s 0 $IP/DeviceInformation | awk '/Serial\ Number/,/Model\ Number/'  | grep -e '^<TD>' | hxselect -c B 2>/dev/null)
+    fi
+    if [ -z "$SERIAL" ]; then
+        SERIAL=$(curl -s 0 http://$IP/ | tidy -q  2>&1 | awk '/Serial\ Number/,/Model\ Number/' | grep -ve Warning -ve normalize | hxselect -c b | sed 's/Number\(.*\)/Number \1/' | awk {'print $3'})
     fi
     csv="$SERIAL,$DEVICE_TYPE,$DEVICE_VERSION,$USER,$DESC,$REGISTERED,$EXTENSION"
 #    phone[$IP]=$csv
