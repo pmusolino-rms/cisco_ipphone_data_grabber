@@ -4,8 +4,8 @@
 # tidy is required for tidy printing of malformed or condensed HTML
 #GET INDEXES
 phone_index_array=()
-CUCM="10.2.249.106"
-COMMUNITY="cacti"
+CUCM="1.2.3.4".
+COMMUNITY="somecommunity"
 
 #Create file
 CSV_FILE="phone_data.csv"
