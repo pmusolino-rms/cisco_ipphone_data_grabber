@@ -2,10 +2,11 @@
 #  The following script queries call manager via SNMP to get basic phone data then visits the phones web page to grab serial number.
 # html-xml-utils is required for hxselect
 # tidy is required for tidy printing of malformed or condensed HTML
+# CISCO-CCM-MIB is required in your mibdir
 #GET INDEXES
 phone_index_array=()
 CUCM="1.2.3.4"
-COMMUNITY="community"
+COMMUNITY="somecommunity"
 
 #Create file
 CSV_FILE="phone_data.csv"
